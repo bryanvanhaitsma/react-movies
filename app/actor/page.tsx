@@ -1,13 +1,16 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function ActorPage() {
   const [name, setName] = useState("");
   const [suggestions, setSuggestions] = useState<Array<{ id: number; name: string; profile_path: string | null }>>([]);
   const [open, setOpen] = useState(false);
+  const [trending, setTrending] = useState<Array<{ id: number; name: string; profile_path: string | null }>>([]);
   const controllerRef = useRef<AbortController | null>(null);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
   function onSearch(e: React.FormEvent) {
@@ -50,9 +53,83 @@ export default function ActorPage() {
     router.push(`/actor/${encodeURIComponent(name)}`);
   }
 
+  // Fetch trending actors on mount
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const res = await fetch("/api/actor/trending");
+        if (!res.ok) return;
+        const data = await res.json();
+        setTrending(data.results || []);
+      } catch (e) {
+        // ignore errors
+      }
+    };
+    fetchTrending();
+  }, []);
+
+  const scrollCarousel = (direction: number) => {
+    carouselRef.current?.scrollBy({ left: direction * 300, behavior: "smooth" });
+  };
+
   return (
-    <div className="mx-auto max-w-2xl p-6">
+    <div className="mx-auto max-w-5xl p-6">
       <h1 className="text-3xl font-semibold mb-6">Actor Search</h1>
+      
+      {trending.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-medium">Trending Actors</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => scrollCarousel(-1)}
+                className="rounded border px-3 py-1 text-sm bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                aria-label="Previous"
+              >
+                ◀
+              </button>
+              <button
+                onClick={() => scrollCarousel(1)}
+                className="rounded border px-3 py-1 text-sm bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                aria-label="Next"
+              >
+                ▶
+              </button>
+            </div>
+          </div>
+          <div
+            ref={carouselRef}
+            className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2"
+          >
+            {trending.map((actor) => (
+              <Link
+                key={actor.id}
+                href={`/actor/${encodeURIComponent(actor.name)}`}
+                className="snap-start flex-none group"
+              >
+                <div className="w-32 flex flex-col items-center gap-2">
+                  {actor.profile_path ? (
+                    <div className="relative w-32 h-48 rounded overflow-hidden bg-zinc-100 dark:bg-zinc-800 group-hover:ring-2 ring-zinc-400 transition">
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
+                        alt={actor.name}
+                        fill
+                        sizes="128px"
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-32 h-48 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs text-zinc-500">
+                      No Image
+                    </div>
+                  )}
+                  <p className="text-sm font-medium text-center line-clamp-2 w-full">{actor.name}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
       <form onSubmit={onSearch} className="mb-8">
         <div className="relative">
           <div className="flex gap-3 flex-col sm:flex-row">

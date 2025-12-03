@@ -1,4 +1,4 @@
-import { NormalizedMovieCredit, TMDBMovieCreditsResponse, TMDBPersonImagesResponse, TMDBSearchPersonResponse } from "../types/tmdb";
+import { NormalizedMovieCredit, TMDBMovieCreditsResponse, TMDBPersonImagesResponse, TMDBPopularPersonsResponse, TMDBSearchPersonResponse } from "../types/tmdb";
 
 const TMDB_API_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
@@ -11,7 +11,7 @@ function getApiKey(): string {
   return key;
 }
 
-async function tmdbFetch<T>(path: string, query: Record<string, string | number | undefined> = {}): Promise<T> {
+async function tmdbFetch<T>(path: string, query: Record<string, string | number | boolean | undefined> = {}): Promise<T> {
   const apiKey = getApiKey();
   const url = new URL(`${TMDB_API_BASE}${path}`);
   url.searchParams.set("api_key", apiKey);
@@ -39,6 +39,10 @@ export async function getPersonImages(personId: number) {
   return tmdbFetch<TMDBPersonImagesResponse>(`/person/${personId}/images`, {
     include_image_language: "en,null",
   });
+}
+
+export async function getPopularPersons() {
+  return tmdbFetch<TMDBPopularPersonsResponse>("/person/popular", {});
 }
 
 export function imageUrl(path: string, size: string = DEFAULT_PROFILE_SIZE) {

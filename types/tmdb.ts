@@ -50,3 +50,10 @@ export interface TMDBPersonImagesResponse {
   id: number;
   profiles: TMDBImageProfile[];
 }
+
+export interface TMDBPopularPersonsResponse {
+  page: number;
+  results: TMDBPersonResult[];
+  total_results: number;
+  total_pages: number;
+}
