@@ -5,7 +5,12 @@ import { getTrendingMovies, imageUrl } from "@/services/tmdb";
 
 export default async function Home() {
   const trendingData = await getTrendingMovies("week");
-  const movies = trendingData.results.slice(0, 20);
+  
+  // Sort by popularity (TMDB's popularity metric correlates with box office/ticket sales)
+  // Higher popularity = more ticket sales and viewership
+  const movies = trendingData.results
+    .sort((a, b) => b.popularity - a.popularity)
+    .slice(0, 20);
   
   // Get a high-rated backdrop for hero
   const heroMovie = movies.find(m => m.backdrop_path && m.vote_average > 7) || movies[0];

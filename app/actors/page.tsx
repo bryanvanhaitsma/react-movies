@@ -17,7 +17,7 @@ export default function ActorPage() {
     e.preventDefault();
     const q = name.trim();
     if (!q) return;
-    router.push(`/actor/${encodeURIComponent(q)}`);
+    router.push(`/actors/${encodeURIComponent(q)}`);
   }
 
   // Debounced autosuggest (500ms)
@@ -35,7 +35,7 @@ export default function ActorPage() {
     controllerRef.current = controller;
     const run = async () => {
       try {
-        const res = await fetch(`/api/actor/suggest?q=${encodeURIComponent(q)}`, { signal: controller.signal });
+        const res = await fetch(`/api/actors/suggest?q=${encodeURIComponent(q)}`, { signal: controller.signal });
         if (!res.ok) return;
         const data = await res.json();
         setSuggestions(data.results || []);
@@ -57,7 +57,7 @@ export default function ActorPage() {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await fetch("/api/actor/trending");
+        const res = await fetch("/api/actors/trending");
         if (!res.ok) return;
         const data = await res.json();
         setTrending(data.results || []);
@@ -104,7 +104,7 @@ export default function ActorPage() {
             {trending.map((actor) => (
               <Link
                 key={actor.id}
-                href={`/actor/${encodeURIComponent(actor.name)}`}
+                href={`/actors/${encodeURIComponent(actor.name)}`}
                 className="snap-start flex-none group"
               >
                 <div className="w-32 flex flex-col items-center gap-2">

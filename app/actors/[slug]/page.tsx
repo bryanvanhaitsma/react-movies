@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Carousel from "@/components/Carousel";
 import { getPersonImages, getPersonMovieCredits, normalizeMovieCredits, searchPersonByName, imageUrl } from "../../../services/tmdb";
+import Link from "next/link";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -11,8 +12,10 @@ export default async function ActorSlugPage({ params }: PageProps) {
   if (!people.length) {
     return (
       <div className="mx-auto max-w-5xl p-6">
-        <h1 className="text-2xl font-semibold">No results for "{slug}"</h1>
-        <p className="mt-4 text-zinc-600"><a className="underline" href="/actor">Try another search</a></p>
+        <h1 className="text-2xl font-semibold">No results for &quot;{slug}&quot;</h1>
+        <p className="mt-4 text-zinc-600">
+          <Link href="/actors" className="underline">Try another search</Link>
+        </p>
       </div>
     );
   }
