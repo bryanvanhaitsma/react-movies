@@ -1,4 +1,12 @@
-import { NormalizedMovieCredit, TMDBMovieCreditsResponse, TMDBPersonImagesResponse, TMDBPopularPersonsResponse, TMDBSearchPersonResponse } from "../types/tmdb";
+import { 
+  NormalizedMovieCredit, 
+  TMDBMovieCreditsResponse, 
+  TMDBMovieDetailsResponse, 
+  TMDBPersonImagesResponse, 
+  TMDBPopularPersonsResponse, 
+  TMDBSearchPersonResponse, 
+  TMDBTrendingMoviesResponse 
+} from "../types/tmdb";
 
 const TMDB_API_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
@@ -43,6 +51,14 @@ export async function getPersonImages(personId: number) {
 
 export async function getPopularPersons() {
   return tmdbFetch<TMDBPopularPersonsResponse>("/person/popular", {});
+}
+
+export async function getTrendingMovies(timeWindow: "day" | "week" = "week") {
+  return tmdbFetch<TMDBTrendingMoviesResponse>(`/trending/movie/${timeWindow}`, {});
+}
+
+export async function getMovieDetails(movieId: number) {
+  return tmdbFetch<TMDBMovieDetailsResponse>(`/movie/${movieId}`, {});
 }
 
 export function imageUrl(path: string, size: string = DEFAULT_PROFILE_SIZE) {

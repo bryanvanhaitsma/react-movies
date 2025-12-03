@@ -1,65 +1,90 @@
 import Image from "next/image";
+import Link from "next/link";
+import Carousel from "@/components/Carousel";
+import { getTrendingMovies, imageUrl } from "@/services/tmdb";
 
-export default function Home() {
+export default async function Home() {
+  const trendingData = await getTrendingMovies("week");
+  const movies = trendingData.results.slice(0, 20);
+  
+  // Get a high-rated backdrop for hero
+  const heroMovie = movies.find(m => m.backdrop_path && m.vote_average > 7) || movies[0];
+  
+  // Prepare carousel images
+  const carouselImages = movies
+    .filter(m => m.poster_path)
+    .map(m => ({
+      url: imageUrl(m.poster_path!, "w500"),
+      alt: m.title
+    }));
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <div className="min-h-screen bg-zinc-950 text-white">
+      {/* Hero Section */}
+      <div className="relative h-[70vh] w-full overflow-hidden">
+        {/* Backdrop Image */}
+        {heroMovie.backdrop_path && (
+          <div className="absolute inset-0">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src={imageUrl(heroMovie.backdrop_path, "original")}
+              alt={heroMovie.title}
+              fill
+              priority
+              className="object-cover"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {/* Gradient Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/80 via-transparent to-zinc-950/40" />
+          </div>
+        )}
+        
+        {/* Hero Content */}
+        <div className="relative z-10 flex h-full items-end">
+          <div className="max-w-7xl mx-auto px-6 pb-16 w-full">
+            <div className="max-w-2xl">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
+                {heroMovie.title}
+              </h1>
+              <p className="text-lg md:text-xl text-zinc-200 mb-6 line-clamp-3 drop-shadow-md">
+                {heroMovie.overview}
+              </p>
+              <div className="flex gap-4 items-center">
+                <span className="px-3 py-1 bg-yellow-500 text-black font-semibold rounded text-sm">
+                  ⭐ {heroMovie.vote_average.toFixed(1)}
+                </span>
+                <span className="text-zinc-300">
+                  {heroMovie.release_date ? new Date(heroMovie.release_date).getFullYear() : ""}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
+
+      {/* Trending Movies Carousel */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold">Trending This Week</h2>
+          <Link href="/actor" className="text-zinc-400 hover:text-white transition-colors">
+            Explore Actors →
+          </Link>
+        </div>
+        <Carousel images={carouselImages} />
+      </div>
+
+      {/* CTA Section */}
+      <div className="max-w-7xl mx-auto px-6 py-16 text-center">
+        <h3 className="text-2xl font-semibold mb-4">Discover Your Next Favorite</h3>
+        <p className="text-zinc-400 mb-8 max-w-xl mx-auto">
+          Search for actors to explore their filmography, or browse trending movies to find your next watch.
+        </p>
+        <Link 
+          href="/actor"
+          className="inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-zinc-200 transition-colors"
+        >
+          Search Actors
+        </Link>
+      </div>
     </div>
   );
 }
